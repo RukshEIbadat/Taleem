@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TALEEM — AI Academic Tutor for Pakistan</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--oxford:#002147;--oxford-deep:#001430;--oxford-mid:#012d62;--oxford-soft:#0a3b7a;--gold:#C8960C;--gold-light:#e8b52a;--gold-dim:#8a6208;--ivory:#FAFAF8;--text-dim:#8a9bb0;--text-mid:#4a5568;--text-faint:#b8c4d0;--glass-bg:rgba(255,255,255,0.12);--glass-bg-strong:rgba(255,255,255,0.18);--glass-bg-subtle:rgba(255,255,255,0.07);--glass-border:rgba(255,255,255,0.22);--glass-border-dim:rgba(255,255,255,0.12);--glass-shadow:0 8px 32px rgba(0,21,47,0.18);--glass-inset:inset 0 1px 0 rgba(255,255,255,0.28);--radius-md:10px;--radius-lg:16px;--trans:0.2s cubic-bezier(0.4,0,0.2,1);--success:rgba(52,211,153,0.85);--err:rgba(220,80,60,0.85)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--oxford-deep);color:var(--ivory);font-family:'DM Sans',sans-serif;font-size:13px;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 80% 60% at 15% 20%,rgba(12,68,124,.45) 0%,transparent 60%),radial-gradient(ellipse 60% 50% at 85% 80%,rgba(0,33,71,.6) 0%,transparent 55%),radial-gradient(ellipse 40% 40% at 50% 50%,rgba(1,45,98,.3) 0%,transparent 60%)}
+body::after{content:'';position:fixed;inset:0;z-index:0;opacity:.4;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")}
+.app{position:relative;z-index:1;display:grid;grid-template-rows:52px 1fr;height:100vh;animation:app-in .5s ease}
+.body{display:grid;grid-template-columns:280px 1fr 272px;overflow:hidden}
+@keyframes app-in{from{opacity:0}to{opacity:1}}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:relative;z-index:100;background:rgba(0,20,48,.72);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border-bottom:.5px solid rgba(200,150,12,.2);box-shadow:0 1px 0 rgba(200,150,12,.1),0 4px 24px rgba(0,10,30,.3)}
+.topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(200,150,12,.6) 30%,rgba(200,150,12,.8) 50%,rgba(200,150,12,.6) 70%,transparent)}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-mark{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--oxford-mid),var(--oxford-soft));border:1px solid rgba(200,150,12,.4);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.1)}
+.logo-l{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:var(--gold-light)}
+.logo-text{display:flex;flex-direction:column;gap:1px}
+.logo-name{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;color:var(--ivory);letter-spacing:.06em}
+.logo-tag{font-size:9px;font-weight:300;color:rgba(200,150,12,.7);letter-spacing:.18em;text-transform:uppercase}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.status-pill{display:flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:10px;font-family:'DM Mono',monospace;color:rgba(200,150,12,.8);background:rgba(200,150,12,.08);border:.5px solid rgba(200,150,12,.2)}
+.status-pill::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--gold);animation:pg 2.2s ease-in-out infinite}
+@keyframes pg{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(200,150,12,.4)}50%{opacity:.7;box-shadow:0 0 0 4px rgba(200,150,12,0)}}
+.left-panel{background:rgba(0,20,48,.35);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border-right:.5px solid rgba(255,255,255,.1);overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;padding:10px 0;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent;animation:sil .55s cubic-bezier(.4,0,.2,1) .08s both}
+@keyframes sil{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+.lp-section{padding:0 14px 12px;border-bottom:.5px solid rgba(255,255,255,.06)}
+.lp-section:last-child{border-bottom:none}
+.lp-header{display:flex;align-items:center;gap:7px;padding:10px 0 7px}
+.step-badge{width:16px;height:16px;border-radius:50%;background:rgba(200,150,12,.12);border:.5px solid rgba(200,150,12,.35);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;color:var(--gold-light);font-family:'DM Mono',monospace;flex-shrink:0;transition:var(--trans)}
+.step-badge.done{background:rgba(200,150,12,.25);border-color:rgba(200,150,12,.6)}
+.lp-label{font-size:9px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:rgba(200,150,12,.65)}
+.cs{width:100%;padding:7px 28px 7px 11px;background:var(--glass-bg-subtle);backdrop-filter:blur(8px);border:.5px solid var(--glass-border-dim);border-radius:var(--radius-md);color:var(--ivory);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='rgba(200,150,12,0.6)'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;transition:var(--trans)}
+.cs:focus{border-color:rgba(200,150,12,.45);box-shadow:0 0 0 3px rgba(200,150,12,.12)}
+.cs:disabled{opacity:.32;cursor:not-allowed}
+.cs option{background:var(--oxford-deep);color:var(--ivory)}
+.medium-row{display:flex;flex-wrap:wrap;gap:5px}
+.medium-pill{padding:4px 12px;border-radius:20px;font-size:10.5px;border:.5px solid var(--glass-border-dim);background:var(--glass-bg-subtle);color:var(--text-dim);cursor:pointer;transition:var(--trans)}
+.medium-pill:hover{color:var(--ivory);border-color:rgba(255,255,255,.22)}
+.medium-pill.active{background:rgba(200,150,12,.14);border-color:rgba(200,150,12,.4);color:var(--gold-light)}
+.subject-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;max-height:192px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent}
+.subject-chip{padding:6px 8px;border-radius:var(--radius-md);background:var(--glass-bg-subtle);border:.5px solid var(--glass-border-dim);font-size:10.5px;font-weight:400;color:var(--text-dim);cursor:pointer;text-align:center;transition:var(--trans);line-height:1.3}
+.subject-chip:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:var(--ivory)}
+.subject-chip.active{background:rgba(200,150,12,.14);border-color:rgba(200,150,12,.38);color:var(--gold-light)}
+.subj-ph{font-size:10.5px;color:var(--text-faint);font-style:italic;text-align:center;padding:12px;grid-column:1/-1}
+.teacher-card{background:var(--glass-bg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:.5px solid var(--glass-border);border-radius:var(--radius-lg);padding:13px;box-shadow:var(--glass-shadow),var(--glass-inset);position:relative;overflow:hidden}
+.teacher-card::before{content:'';position:absolute;top:0;left:0;right:0;height:40%;background:linear-gradient(to bottom,rgba(200,150,12,.06),transparent);pointer-events:none}
+.tav{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--oxford-mid),var(--oxford-soft));border:1.5px solid rgba(200,150,12,.4);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--gold-light);margin-bottom:7px;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.tname{font-size:12.5px;font-weight:500;color:var(--ivory);font-family:'Playfair Display',serif}
+.trole{font-size:10px;font-weight:300;color:var(--text-dim);margin-top:2px}
+.tonline{display:flex;align-items:center;gap:5px;margin-top:7px;font-size:9.5px;color:var(--success)}
+.tonline::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--success);animation:pg 2s ease-in-out infinite}
+.sess-item{padding:7px 9px;border-radius:var(--radius-md);background:var(--glass-bg-subtle);border:.5px solid transparent;cursor:pointer;transition:var(--trans);margin-bottom:4px}
+.sess-item:hover,.sess-item.active{background:var(--glass-bg);border-color:var(--glass-border-dim)}
+.sess-item.active{border-color:rgba(200,150,12,.25)}
+.si-title{font-size:11px;color:var(--ivory);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.si-meta{font-size:9px;color:var(--text-dim);font-family:'DM Mono',monospace;margin-top:2px}
+.btn-ns{width:100%;padding:7px;background:transparent;border:.5px solid var(--glass-border-dim);border-radius:var(--radius-md);color:var(--gold-light);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:var(--trans)}
+.btn-ns:hover{background:rgba(200,150,12,.08);border-color:rgba(200,150,12,.3)}
+.chat-main{display:flex;flex-direction:column;overflow:hidden;background:transparent;position:relative}
+.chat-window{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:0;scrollbar-width:none}
+.chat-window::-webkit-scrollbar{display:none}
+.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:62vh;text-align:center;padding:32px;animation:fu .7s cubic-bezier(.4,0,.2,1) .2s both}
+@keyframes fu{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.wb{display:inline-flex;align-items:center;gap:8px;padding:5px 16px;border-radius:20px;background:rgba(200,150,12,.1);border:.5px solid rgba(200,150,12,.3);font-size:10px;color:var(--gold-light);letter-spacing:.1em;text-transform:uppercase;margin-bottom:20px}
+.wt{margin-bottom:16px;text-align:center}
+.wt-urdu{font-family:'Noto Nastaliq Urdu',serif;font-size:38px;font-weight:700;color:var(--gold-light);direction:rtl;display:block;line-height:2.0;letter-spacing:0}
+.wt-rule{display:block;width:60px;height:1.5px;background:linear-gradient(90deg,transparent,rgba(200,150,12,0.7),transparent);margin:6px auto 10px}
+.wt-english{font-family:'Playfair Display',serif;font-size:28px;font-weight:400;font-style:italic;color:var(--ivory);display:block;letter-spacing:0.02em;line-height:1.3}
+
+.ws{font-size:13px;font-weight:300;color:var(--text-dim);max-width:460px;line-height:1.7;margin-bottom:26px}
+.stat-row{display:flex;gap:24px;margin-bottom:26px}
+.si2{text-align:center}
+.sn{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:var(--gold-light)}
+.sl{font-size:10px;font-weight:300;color:var(--text-dim);letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
+.qr{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;max-width:540px}
+.qc{padding:7px 16px;border-radius:20px;background:var(--glass-bg-subtle);border:.5px solid var(--glass-border-dim);font-size:11px;font-weight:300;color:var(--text-mid);cursor:pointer;transition:var(--trans);font-style:italic}
+.qc:hover{background:var(--glass-bg);border-color:rgba(200,150,12,.3);color:var(--gold-light)}
+.msg-wrap{padding:14px 0;border-bottom:.5px solid rgba(255,255,255,.05);animation:mi .3s ease}
+.msg-wrap:last-child{border-bottom:none}
+@keyframes mi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.msg-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.msg-av{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;flex-shrink:0}
+.msg-av.user{background:rgba(255,255,255,.08);border:.5px solid rgba(255,255,255,.15);color:var(--text-dim)}
+.msg-av.ai{background:linear-gradient(135deg,var(--oxford-mid),var(--oxford-soft));border:.5px solid rgba(200,150,12,.35);color:var(--gold-light)}
+.msg-name{font-size:11px;font-weight:500;color:var(--text-dim)}
+.msg-body{font-size:13.5px;line-height:1.8;color:rgba(250,250,248,.88);word-break:break-word;padding-left:36px}
+.msg-body.uq{color:rgba(250,250,248,.6);font-style:italic}
+.ai-card{margin-left:36px;margin-top:8px;background:var(--glass-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:.5px solid var(--glass-border);border-radius:var(--radius-lg);padding:16px 18px;box-shadow:var(--glass-shadow),var(--glass-inset);font-size:13.5px;line-height:1.8;color:rgba(250,250,248,.9);position:relative;overflow:hidden;word-break:break-word}
+.ai-card::before{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(to bottom,rgba(255,255,255,.04),transparent);pointer-events:none}
+.ai-card h1,.ai-card h2{font-family:'Playfair Display',serif;color:var(--ivory);margin:14px 0 6px;border-bottom:.5px solid rgba(255,255,255,.08);padding-bottom:4px}
+.ai-card h1{font-size:17px}.ai-card h2{font-size:15px}
+.ai-card h3{font-size:11.5px;font-weight:600;color:var(--gold-light);margin:12px 0 5px;text-transform:uppercase;letter-spacing:.08em}
+.ai-card strong{color:var(--gold-light);font-weight:600}
+.ai-card em{color:rgba(250,250,248,.72);font-style:italic}
+.ai-card ol,.ai-card ul{padding-left:20px;margin:8px 0}
+.ai-card li{margin:4px 0;line-height:1.7}
+.ai-card hr{border:none;border-top:.5px solid rgba(255,255,255,.1);margin:12px 0}
+.ai-card p{margin:5px 0}
+.src-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:12px;padding-top:10px;border-top:.5px solid rgba(255,255,255,.08)}
+.src-tag{padding:3px 10px;border-radius:20px;background:rgba(200,150,12,.08);border:.5px solid rgba(200,150,12,.25);font-size:10px;font-family:'DM Mono',monospace;color:rgba(200,150,12,.8);cursor:pointer;text-decoration:none;transition:var(--trans)}
+.src-tag:hover{color:var(--gold-light);background:rgba(200,150,12,.14)}
+.thinking{display:flex;gap:4px;align-items:center;padding:4px 0}
+.t-dot{width:5px;height:5px;border-radius:50%;background:rgba(200,150,12,.6);animation:tb 1.1s ease-in-out infinite}
+.t-dot:nth-child(2){animation-delay:.15s}.t-dot:nth-child(3){animation-delay:.3s}
+@keyframes tb{0%,80%,100%{transform:translateY(0);opacity:.4}40%{transform:translateY(-5px);opacity:1}}
+.cur{display:inline-block;width:2px;height:.9em;background:var(--gold-light);margin-left:2px;vertical-align:text-bottom;animation:cb .75s step-end infinite}
+@keyframes cb{0%,100%{opacity:1}50%{opacity:0}}
+.input-area{padding:11px 28px 14px;background:rgba(0,20,48,.5);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:.5px solid rgba(255,255,255,.08)}
+.input-row{display:flex;align-items:flex-end;gap:8px}
+.input-box{flex:1;display:flex;align-items:flex-end;gap:8px;background:var(--glass-bg);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:.5px solid var(--glass-border);border-radius:14px;padding:10px 14px;box-shadow:var(--glass-shadow),var(--glass-inset);transition:var(--trans)}
+.input-box:focus-within{border-color:rgba(200,150,12,.45);box-shadow:0 0 0 3px rgba(200,150,12,.1),var(--glass-shadow),var(--glass-inset)}
+#msg-input{flex:1;background:transparent;border:none;outline:none;color:var(--ivory);font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.5;resize:none;min-height:22px;max-height:100px;overflow-y:auto;scrollbar-width:none}
+#msg-input::placeholder{color:rgba(255,255,255,.25)}
+.btn-send{width:38px;height:38px;border-radius:12px;background:var(--gold);color:var(--oxford-deep);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--trans);flex-shrink:0}
+.btn-send:hover{background:var(--gold-light);transform:scale(1.04)}
+.btn-send:disabled{opacity:.38;cursor:not-allowed;transform:none}
+.input-hint{margin-top:6px;display:flex;justify-content:space-between;font-size:9px;color:rgba(255,255,255,.2);font-family:'DM Mono',monospace}
+.right-panel{background:rgba(0,20,48,.28);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border-left:.5px solid rgba(255,255,255,.08);overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent;animation:sir .55s cubic-bezier(.4,0,.2,1) .16s both}
+@keyframes sir{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:translateX(0)}}
+.rp-section{padding:12px 14px 10px;border-bottom:.5px solid rgba(255,255,255,.05)}
+.rp-section:last-child{border-bottom:none}
+.panel-label{font-size:9px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:rgba(200,150,12,.65);padding:8px 0 6px}
+.memory-glass{background:var(--glass-bg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:.5px solid var(--glass-border);border-radius:var(--radius-lg);padding:12px 14px;box-shadow:var(--glass-shadow),var(--glass-inset);font-size:11px;font-weight:300;color:var(--text-mid);line-height:1.65;font-style:italic;min-height:52px}
+.bi-card{background:var(--glass-bg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:.5px solid var(--glass-border);border-radius:var(--radius-lg);padding:12px 14px;box-shadow:var(--glass-shadow),var(--glass-inset)}
+.bi-board{font-family:'Playfair Display',serif;font-size:13px;font-weight:500;color:var(--ivory);margin-bottom:3px}
+.bi-level{font-size:11px;font-weight:400;color:var(--gold-light);margin-bottom:5px}
+.bi-sys{font-size:10.5px;font-weight:300;color:var(--text-dim);line-height:1.55}
+.topic-chip{display:block;padding:7px 10px;border-radius:var(--radius-md);background:var(--glass-bg-subtle);border:.5px solid transparent;font-size:11px;font-weight:300;color:var(--text-mid);cursor:pointer;transition:var(--trans);margin-bottom:4px;line-height:1.4}
+.topic-chip:hover{background:rgba(200,150,12,.08);border-color:rgba(200,150,12,.25);color:var(--gold-light)}
+.prog-item{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
+.prog-label{display:flex;justify-content:space-between;font-size:10px;color:var(--text-dim)}
+.prog-track{height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;border-radius:2px;transition:width .6s ease}
+
+/* ── Language Switcher ─────────────────────────────────── */
+.lang-switcher{position:relative;display:flex;align-items:center}
+.lang-btn{padding:4px 11px;border-radius:20px;border:.5px solid var(--glass-border-dim);background:var(--glass-bg-subtle);color:var(--gold-light);font-size:10px;font-family:'DM Mono',monospace;cursor:pointer;display:flex;align-items:center;gap:5px;transition:var(--trans)}
+.lang-btn:hover{border-color:rgba(200,150,12,.35);background:rgba(200,150,12,.08)}
+.lang-menu{position:absolute;top:calc(100% + 6px);right:0;background:rgba(0,20,48,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:.5px solid rgba(200,150,12,.25);border-radius:10px;padding:8px;min-width:170px;box-shadow:0 12px 40px rgba(0,0,0,.5);z-index:500;display:none;flex-direction:column;gap:2px}
+.lang-menu.open{display:flex}
+.lang-opt{padding:6px 10px;border-radius:7px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;color:rgba(250,250,248,.7);transition:var(--trans)}
+.lang-opt:hover,.lang-opt.active{background:rgba(200,150,12,.12);color:var(--gold-light)}
+.lang-opt.active::after{content:'✓';font-size:10px;color:var(--gold-light)}
+.lang-native{font-size:11px;color:rgba(250,250,248,.45)}
+.dash-nav-btn{padding:4px 11px;border-radius:20px;border:.5px solid var(--glass-border-dim);background:var(--glass-bg-subtle);color:var(--text-dim);font-size:10px;cursor:pointer;text-decoration:none;transition:var(--trans);white-space:nowrap}
+.dash-nav-btn:hover{color:var(--gold-light);border-color:rgba(200,150,12,.3)}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-mark"><span class="logo-l">T</span></div>
+    <div class="logo-text">
+      <div class="logo-name">TALEEM</div>
+      <div class="logo-tag">Teaching and Adaptive Learning Engine for Every Mind</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <a href="student_dashboard.html" class="dash-nav-btn">Student Progress</a>
+    <a href="performance_dashboard.html" class="dash-nav-btn">System Performance</a>
+    <div class="lang-switcher" id="langSwitcher">
+      <div class="lang-btn" onclick="toggleLangMenu()" id="langBtn">
+        <svg width="11" height="11" fill="currentColor" viewBox="0 0 24 24"><path d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/></svg>
+        <span id="langLabel">English</span>
+        <svg width="8" height="5" fill="currentColor" viewBox="0 0 10 6"><path d="M0 0l5 6 5-6z"/></svg>
+      </div>
+      <div class="lang-menu" id="langMenu"></div>
+    </div>
+    <div class="status-pill" id="statusPill" data-i18n="status-ready">Ready</div>
+  </div>
+</div>
+<div class="body">
+<div class="left-panel">
+  <div class="lp-section">
+    <div class="lp-header"><div class="step-badge" id="b1">1</div><div class="lp-label" data-i18n="step-province">Province</div></div>
+    <select class="cs" id="selP" onchange="onP()"><option value="">Select Province...</option></select>
+  </div>
+  <div class="lp-section">
+    <div class="lp-header"><div class="step-badge" id="b2">2</div><div class="lp-label" data-i18n="step-city">City</div></div>
+    <select class="cs" id="selC" disabled onchange="onC()"><option value="">Select Province first...</option></select>
+  </div>
+  <div class="lp-section">
+    <div class="lp-header"><div class="step-badge" id="b3">3</div><div class="lp-label" data-i18n="step-board">Board</div></div>
+    <select class="cs" id="selB" disabled onchange="onBd()"><option value="">Select City first...</option></select>
+  </div>
+  <div class="lp-section">
+    <div class="lp-header"><div class="step-badge" id="b4">4</div><div class="lp-label" data-i18n="step-edlevel">Education Level</div></div>
+    <select class="cs" id="selL" disabled onchange="onLv()"><option value="">Select Board first...</option></select>
+  </div>
+  <div class="lp-section">
+    <div class="lp-header"><div class="step-badge" id="b5">5</div><div class="lp-label" data-i18n="step-grade">Grade / Stream</div></div>
+    <select class="cs" id="selG" disabled onchange="onGr()"><option value="">Select Level first...</option></select>
+  </div>
+  <div class="lp-section">
+    <div class="lp-header"><div class="step-badge" id="b6">6</div><div class="lp-label" data-i18n="step-medium">Medium of Instruction</div></div>
+    <div class="medium-row" id="medRow"><div class="medium-pill active" onclick="selMed(this,'English')">English</div></div>
+  </div>
+  <div class="lp-section">
+    <div class="lp-header"><div class="step-badge" id="b7">7</div><div class="lp-label" data-i18n="step-subject">Subject</div></div>
+    <div class="subject-grid" id="subjGrid"><div class="subj-ph">Complete steps 1–5 to see subjects</div></div>
+  </div>
+  <div class="lp-section">
+    <div class="lp-label" data-i18n="step-teacher" style="padding-top:10px">Your AI Teacher</div>
+    <div class="teacher-card">
+      <div class="tav" id="tAv">T</div>
+      <div class="tname" id="tName">TALEEM</div>
+      <div class="trole" id="tRole" data-i18n="teacher-default">Select a subject to meet your teacher</div>
+      <div class="tonline">Online — ready to teach</div>
+    </div>
+  </div>
+  <div class="lp-section">
+    <div class="lp-label" data-i18n="step-sessions" style="padding-top:10px">Sessions</div>
+    <button class="btn-ns" data-i18n="new-session" onclick="newSess()">+ New Session</button>
+    <div style="margin-top:8px" id="sessList"></div>
+  </div>
+</div>
+<div class="chat-main">
+  <div class="chat-window" id="chatWin">
+    <div class="welcome" id="welcomeSc">
+      <div class="wb" data-i18n="welcome-badge">Wikipedia RAG · GPT-4o-mini · LangChain · All Pakistan Boards</div>
+      <h1 class="wt">
+          <span class="wt-urdu">تعلیم روشنی ہے</span>
+          <span class="wt-rule"></span>
+          <span class="wt-english">Education is Light</span>
+        </h1>
+      <p class="ws" data-i18n="welcome-sub">Select your province, city, and board to begin. TALEEM covers every board in Pakistan — Pre-School through A-Level, in your language, on your curriculum.</p>
+      <div class="stat-row">
+        <div class="si2"><div class="sn" id="sprov">8</div><div class="sl">Provinces</div></div>
+        <div class="si2"><div class="sn" id="sboard">28</div><div class="sl">Boards</div></div>
+        <div class="si2"><div class="sn">Pre–A2</div><div class="sl">All Levels</div></div>
+        <div class="si2"><div class="sn">14</div><div class="sl">Languages</div></div>
+      </div>
+      <div class="qr">
+        <span class="qc" onclick="qa(this.textContent)">Explain Newton's Laws with examples</span>
+        <span class="qc" onclick="qa(this.textContent)">What caused the partition of 1947?</span>
+        <span class="qc" onclick="qa(this.textContent)">How does photosynthesis work?</span>
+        <span class="qc" onclick="qa(this.textContent)">Explain the water cycle</span>
+        <span class="qc" onclick="qa(this.textContent)">Solve a quadratic equation</span>
+        <span class="qc" onclick="qa(this.textContent)">Role of Quaid-e-Azam in Pakistan's creation</span>
+      </div>
+    </div>
+  </div>
+  <div class="input-area">
+    <div class="input-row">
+      <div class="input-box">
+        <textarea id="msg-input" placeholder="Ask your teacher anything..." rows="1" onkeydown="hk(event)" oninput="ar(this)"></textarea>
+      </div>
+      <button class="btn-send" id="sendBtn" onclick="send()" title="Send">
+        <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+      </button>
+    </div>
+    <div class="input-hint">
+      <span data-i18n="send-hint">Enter to send · Shift+Enter new line</span>
+      <span id="ctxInfo" style="color:rgba(200,150,12,.6)">Select curriculum to begin</span>
+    </div>
+  </div>
+</div>
+<div class="right-panel">
+  <div class="rp-section">
+    <div class="panel-label" data-i18n="mem-label">Session Memory</div>
+    <div class="memory-glass" id="memBox" data-i18n="no-convo">No conversation yet.</div>
+  </div>
+  <div class="rp-section">
+    <div class="panel-label" data-i18n="board-label">Board Information</div>
+    <div class="bi-card">
+      <div class="bi-board" id="biB" data-i18n-placeholder="not-selected">Not selected</div>
+      <div class="bi-level" id="biL" data-i18n-placeholder="select-board-level">Select board and level</div>
+      <div class="bi-sys"   id="biS" data-i18n="board-default-info">Board details appear after selection.</div>
+    </div>
+  </div>
+  <div class="rp-section">
+    <div class="panel-label" data-i18n="topics-label">Suggested Topics</div>
+    <div id="topChips">
+      <div class="topic-chip" onclick="qa(this.textContent)">Explain this concept with an example</div>
+      <div class="topic-chip" onclick="qa(this.textContent)">Give me a practice question</div>
+      <div class="topic-chip" onclick="qa(this.textContent)">What are the key exam tips?</div>
+      <div class="topic-chip" onclick="qa(this.textContent)">Summarise what we have covered</div>
+    </div>
+  </div>
+  <div class="rp-section">
+    <div class="panel-label" data-i18n="progress-label">Session Progress</div>
+    <div class="prog-item"><div class="prog-label"><span data-i18n="q-asked">Questions Asked</span><span id="qC">0</span></div><div class="prog-track"><div class="prog-fill" id="qB" style="width:0%;background:linear-gradient(90deg,var(--oxford-mid),var(--oxford-soft))"></div></div></div>
+    <div class="prog-item"><div class="prog-label"><span data-i18n="concepts">Concepts Covered</span><span id="cC">0</span></div><div class="prog-track"><div class="prog-fill" id="cB" style="width:0%;background:linear-gradient(90deg,var(--gold-dim),var(--gold))"></div></div></div>
+    <div class="prog-item"><div class="prog-label"><span data-i18n="mem-msgs">Memory Messages</span><span id="mC">0</span></div><div class="prog-track"><div class="prog-fill" id="mB" style="width:0%;background:linear-gradient(90deg,var(--oxford-soft),#4a9eff)"></div></div></div>
+  </div>
+</div>
+</div>
+</div>
+<script>
+const ST={province:'',city:'',board:'',level:'',grade:'',medium:'English',subject:''};
+let sessId=gid(),sessions={},streaming=false,qc=0,cc=0,mc=0;
+const TR={'Mathematics':{av:'AC',name:'Dr. Alex Chen',role:'Mathematics Specialist'},'Physics':{av:'SA',name:'Prof. Sara Ahmed',role:'Physics & Science Expert'},'Chemistry':{av:'JM',name:'Dr. James Malik',role:'Chemistry Teacher'},'Biology':{av:'PS',name:'Ms. Priya Sharma',role:'Biology & Life Sciences'},'History':{av:'OH',name:'Prof. Omar Hassan',role:'History & Social Studies'},'Pakistan Studies':{av:'OH',name:'Prof. Omar Hassan',role:'Pakistan Studies Expert'},'English':{av:'CB',name:'Ms. Claire Burton',role:'English Language & Literature'},'Urdu':{av:'AK',name:'Dr. Ayesha Khan',role:'Urdu Language & Literature'},'Sindhi':{av:'ZM',name:'Dr. Zain Memon',role:'Sindhi Language Expert'},'Pashto':{av:'KK',name:'Mr. Khalid Khan',role:'Pashto Language Expert'},'Balochi':{av:'NB',name:'Mr. Nawab Bugti',role:'Balochi Language Expert'},'Computer':{av:'RP',name:'Mr. Raj Patel',role:'Computer Science & IT'},'Economics':{av:'FA',name:'Dr. Fatima Al-Rashid',role:'Economics & Business'},'Accounting':{av:'ZA',name:'Mr. Zubair Ahmed',role:'Accounting & Finance'},'Geography':{av:'EK',name:'Ms. Elena Kovacs',role:'Geography Specialist'},'Islamic':{av:'MI',name:'Dr. Muhammad Ibrahim',role:'Islamic Studies Expert'},'Arabic':{av:'AA',name:'Dr. Ali Al-Ansari',role:'Arabic Language Expert'},'default':{av:'H',name:'TALEEM',role:'AI Academic Tutor'}};
+const TP={'Physics':['Momentum and impulse','Electromagnetic induction','Newton\'s Laws worked examples','Circular motion','IGCSE Physics exam tips'],'Mathematics':['Quadratic equations step by step','Geometry problem','Statistics and probability','Calculus intro','Paper 2 exam tips'],'Chemistry':['Periodic table groups','Ionic and covalent bonds','Acids, bases and pH','Organic chemistry','IGCSE Chemistry tips'],'Biology':['How photosynthesis works','Cell division — mitosis','Human digestive system','DNA and genetics','Ecology and ecosystems'],'History':['Causes of WW2','Cold War key events','Decolonisation in South Asia','Great Depression','IGCSE History tips'],'Pakistan Studies':['Quaid-e-Azam and Pakistan\'s creation','Geography of Pakistan','Constitutional history','Economic development post-1947','Foreign policy overview'],'English':['Analyse a poem extract','Persuasive writing','Narrative essay techniques','Character development','Paper 2 exam tips'],'Computer':['Algorithms with examples','Object-oriented programming','How the internet works','Binary and hexadecimal','Database design'],'Economics':['Supply and demand','What is GDP?','Inflation causes','International trade','Exam tips'],'Islamic':['Five pillars of Islam','Seerah of the Prophet','Islamic ethics','Quran and Hadith','Islamic history — the Caliphates'],'default':['Explain with an example','Give a practice question','Key exam tips','Summarise what we covered','Visual explanation']};
+function gid(){return 'sess_'+Math.random().toString(36).substr(2,9)}
+function done(n){const b=document.getElementById('b'+n);if(b)b.classList.add('done')}
+function undone(n){const b=document.getElementById('b'+n);if(b)b.classList.remove('done')}
+function resetFrom(from){const ord=['city','board','level','grade','medium','subject'];const selM={city:'selC',board:'selB',level:'selL',grade:'selG'};const ph=['Select Province first...','Select City first...','Select Board first...','Select Level first...'];const idx=ord.indexOf(from);for(let i=idx;i<ord.length;i++)ST[ord[i]]='';for(let i=idx;i<4;i++){const s=document.getElementById(selM[ord[i]]);if(!s)continue;s.innerHTML='<option value="">'+ph[i]+'</option>';s.disabled=true}const bm={city:2,board:3,level:4,grade:5,medium:6,subject:7};for(let i=idx;i<ord.length;i++)undone(bm[ord[i]]);if(idx>=ord.indexOf('medium'))document.getElementById('medRow').innerHTML='<div class="medium-pill active" onclick="selMed(this,\'English\')">English</div>';if(idx>=ord.indexOf('grade'))document.getElementById('subjGrid').innerHTML='<div class="subj-ph">Complete steps 1–5 to see subjects</div>';if(idx>=ord.indexOf('subject')){document.getElementById('tAv').textContent='H';document.getElementById('tName').textContent='TALEEM';document.getElementById('tRole').textContent='Select a subject to meet your teacher';document.getElementById('msg-input').placeholder='Ask your teacher anything...';document.getElementById('topChips').innerHTML='<div class="topic-chip" onclick="qa(this.textContent)">Explain this concept with an example</div><div class="topic-chip" onclick="qa(this.textContent)">Give me a practice question</div><div class="topic-chip" onclick="qa(this.textContent)">Key exam tips</div><div class="topic-chip" onclick="qa(this.textContent)">Summarise what we covered</div>'}updateCtx()}
+async function loadP(){try{const r=await fetch('/cascade/provinces');const d=await r.json();const s=document.getElementById('selP');s.innerHTML='<option value="">Select Province...</option>';d.provinces.forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;s.appendChild(o)});document.getElementById('sprov').textContent=d.provinces.length}catch(e){document.getElementById('selP').innerHTML='<option>Server offline — run backend at localhost:8000</option>'}}
+async function onP(){ST.province=document.getElementById('selP').value;resetFrom('city');if(!ST.province)return;done(1);const s=document.getElementById('selC');s.disabled=true;s.innerHTML='<option>Loading...</option>';try{const r=await fetch('/cascade/cities?province='+encodeURIComponent(ST.province));const d=await r.json();s.innerHTML='<option value="">Select City...</option>';d.cities.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;s.appendChild(o)});s.disabled=false}catch(e){s.innerHTML='<option>Error</option>'}}
+async function onC(){ST.city=document.getElementById('selC').value;resetFrom('board');if(!ST.city)return;done(2);const s=document.getElementById('selB');s.disabled=true;s.innerHTML='<option>Loading...</option>';try{const r=await fetch('/cascade/boards?province='+encodeURIComponent(ST.province)+'&city='+encodeURIComponent(ST.city));const d=await r.json();s.innerHTML='<option value="">Select Board...</option>';d.boards.forEach(b=>{const o=document.createElement('option');o.value=b;o.textContent=b;s.appendChild(o)});s.disabled=false}catch(e){s.innerHTML='<option>Error</option>'}}
+async function onBd(){ST.board=document.getElementById('selB').value;resetFrom('level');if(!ST.board)return;done(3);const s=document.getElementById('selL');s.disabled=true;s.innerHTML='<option>Loading...</option>';try{const r=await fetch('/cascade/levels?province='+encodeURIComponent(ST.province)+'&city='+encodeURIComponent(ST.city)+'&board='+encodeURIComponent(ST.board));const d=await r.json();s.innerHTML='<option value="">Select Education Level...</option>';d.levels.forEach(l=>{const o=document.createElement('option');o.value=l.label;o.textContent=l.label;s.appendChild(o)});s.disabled=false;document.getElementById('biB').textContent=ST.board}catch(e){s.innerHTML='<option>Error</option>'}}
+async function onLv(){ST.level=document.getElementById('selL').value;resetFrom('grade');if(!ST.level)return;done(4);const s=document.getElementById('selG');s.disabled=true;s.innerHTML='<option>Loading...</option>';document.getElementById('biL').textContent=ST.level;try{const r=await fetch('/cascade/grades?province='+encodeURIComponent(ST.province)+'&city='+encodeURIComponent(ST.city)+'&board='+encodeURIComponent(ST.board)+'&level='+encodeURIComponent(ST.level));const d=await r.json();s.innerHTML='<option value="">Select Grade / Stream...</option>';d.grades.forEach(g=>{const o=document.createElement('option');o.value=g;o.textContent=g;s.appendChild(o)});s.disabled=false}catch(e){s.innerHTML='<option>Error</option>'}}
+async function onGr(){ST.grade=document.getElementById('selG').value;resetFrom('medium');if(!ST.grade)return;done(5);try{const r=await fetch('/cascade/subjects?province='+encodeURIComponent(ST.province)+'&city='+encodeURIComponent(ST.city)+'&board='+encodeURIComponent(ST.board)+'&level='+encodeURIComponent(ST.level)+'&grade='+encodeURIComponent(ST.grade));const d=await r.json();const mr=document.getElementById('medRow');mr.innerHTML='';(d.medium||['English']).forEach((m,i)=>{const p=document.createElement('div');p.className='medium-pill'+(i===0?' active':'');p.textContent=m;p.onclick=()=>selMed(p,m);mr.appendChild(p)});ST.medium=d.medium?.[0]||'English';done(6);const g=document.getElementById('subjGrid');g.innerHTML='';if(!d.subjects?.length){g.innerHTML='<div class="subj-ph">No subjects found</div>'}else{d.subjects.forEach(s=>{const c=document.createElement('div');c.className='subject-chip';c.textContent=s;c.onclick=()=>selSubj(c,s);g.appendChild(c)})};updateCtx()}catch(e){document.getElementById('subjGrid').innerHTML='<div class="subj-ph">Error loading subjects</div>'}}
+function selMed(p,m){document.querySelectorAll('.medium-pill').forEach(x=>x.classList.remove('active'));p.classList.add('active');ST.medium=m;updateCtx()}
+function selSubj(chip,subj){ST.subject=subj;document.querySelectorAll('.subject-chip').forEach(c=>c.classList.remove('active'));chip.classList.add('active');done(7);let t=TR.default;for(const k of Object.keys(TR)){if(subj.toLowerCase().includes(k.toLowerCase())){t=TR[k];break}}document.getElementById('tAv').textContent=t.av;document.getElementById('tName').textContent=t.name;document.getElementById('tRole').textContent=t.role;document.getElementById('msg-input').placeholder='Ask '+t.name.split(' ').slice(-1)[0]+' about '+subj+'...';let tp=TP.default;for(const k of Object.keys(TP)){if(subj.toLowerCase().includes(k.toLowerCase())){tp=TP[k];break}}document.getElementById('topChips').innerHTML=tp.map(t=>'<div class="topic-chip" onclick="qa(this.textContent)">'+t+'</div>').join('');updateCtx()}
+function updateCtx(){const p=[];if(ST.province)p.push(ST.province);if(ST.city)p.push(ST.city);if(ST.board)p.push(ST.board.split('(')[0].trim());if(ST.grade)p.push(ST.grade.split('(')[0].trim());if(ST.subject)p.push(ST.subject);if(ST.medium&&ST.medium!=='English')p.push(ST.medium);document.getElementById('ctxInfo').textContent=p.length?p.join(' · '):'Select curriculum to begin'}
+function hk(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}}
+function ar(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px'}
+function qa(q){document.getElementById('msg-input').value=q;send()}
+function sd(){const w=document.getElementById('chatWin');w.scrollTop=w.scrollHeight}
+function esc(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function md(text){let t=esc(text);t=t.replace(/^### (.+)$/gm,'<h3>$1</h3>');t=t.replace(/^## (.+)$/gm,'<h2>$1</h2>');t=t.replace(/^# (.+)$/gm,'<h1>$1</h1>');t=t.replace(/\*\*\*(.+?)\*\*\*/g,'<strong><em>$1</em></strong>');t=t.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');t=t.replace(/\*(.+?)\*/g,'<em>$1</em>');t=t.replace(/^(\d+)\. (.+)$/gm,'<li>$2</li>');t=t.replace(/^- (.+)$/gm,'<li>$1</li>');t=t.replace(/(<li>[\s\S]*?<\/li>)/g,'<ul>$1</ul>');t=t.replace(/^---+$/gm,'<hr>');t=t.replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>');return '<p>'+t+'</p>'}
+function appendM(role,content){const win=document.getElementById('chatWin');const w=document.createElement('div');w.className='msg-wrap msg-dyn';const av=document.getElementById('tAv').textContent||'H';const nm=document.getElementById('tName').textContent||'TALEEM';const isAI=role==='ai';w.innerHTML='<div class="msg-header"><div class="msg-av '+(isAI?'ai':'user')+'">'+(isAI?av:'ST')+'</div><div class="msg-name">'+(isAI?nm:'Student')+'</div></div>'+(isAI?'<div class="ai-card" id="sc"></div>':'<div class="msg-body uq">'+esc(content)+'</div>');win.appendChild(w);sd();return isAI?w.querySelector('#sc'):null}
+function updProg(){document.getElementById('qC').textContent=qc;document.getElementById('cC').textContent=cc;document.getElementById('mC').textContent=mc;document.getElementById('qB').style.width=Math.min(qc*10,100)+'%';document.getElementById('cB').style.width=Math.min(cc*12,100)+'%';document.getElementById('mB').style.width=Math.min(mc*10,100)+'%'}
+function newSess(){sessId=gid();qc=0;cc=0;mc=0;updProg();const w=document.getElementById('chatWin');w.querySelectorAll('.msg-dyn').forEach(el=>el.remove());document.getElementById('welcomeSc').style.display='flex';document.getElementById('memBox').textContent='No conversation yet.';renderSL()}
+function renderSL(){const l=document.getElementById('sessList');const ids=Object.keys(sessions).reverse();if(!ids.length){l.innerHTML='<div style="font-size:10px;color:var(--text-faint);font-style:italic;padding:4px 2px">No sessions yet</div>';return}l.innerHTML=ids.map(id=>'<div class="sess-item '+(id===sessId?'active':'')+'" onclick="swSess(\''+id+'\')"><div class="si-title">'+esc(sessions[id].title)+'</div><div class="si-meta">'+sessions[id].msgs+' msgs</div></div>').join('')}
+function swSess(id){sessId=id;renderSL()}
+async function send(){const inp=document.getElementById('msg-input');const q=inp.value.trim();if(!q||streaming)return;inp.value='';inp.style.height='auto';document.getElementById('welcomeSc').style.display='none';if(!sessions[sessId]){sessions[sessId]={title:q.slice(0,40),msgs:0};renderSL()}appendM('user',q);const card=appendM('ai','');card.innerHTML='<div class="thinking"><div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div></div>';streaming=true;document.getElementById('sendBtn').disabled=true;document.getElementById('statusPill').textContent='Generating...';qc++;try{const res=await fetch('/chat/stream',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q,session_id:sessId,province:ST.province,city:ST.city,board:ST.board,level:ST.level,grade:ST.grade,medium:ST.medium,subject:ST.subject})});const reader=res.body.getReader();const dec=new TextDecoder();let buf='',full='';card.innerHTML='<span class="cur"></span>';while(true){const{done,value}=await reader.read();if(done)break;buf+=dec.decode(value,{stream:true});const lines=buf.split('\n');buf=lines.pop();for(const line of lines){if(!line.startsWith('data: '))continue;const raw=line.slice(6).trim();if(!raw)continue;try{const ev=JSON.parse(raw);if(ev.type==='token'){full+=ev.data;card.innerHTML=md(full)+'<span class="cur"></span>';sd()}else if(ev.type==='done'){card.innerHTML=md(full);if(ev.data?.summary)document.getElementById('memBox').textContent=ev.data.summary;cc++;mc=ev.data?.count||mc;sessions[sessId].msgs++;renderSL();updProg()}else if(ev.type==='sources'&&ev.data?.length){const row=document.createElement('div');row.className='src-row';ev.data.slice(0,3).forEach(s=>{const a=document.createElement('a');a.className='src-tag';a.textContent=s.title||'Wikipedia';a.href=s.url||'#';a.target='_blank';row.appendChild(a)});card.appendChild(row)}else if(ev.type==='error'){card.innerHTML='<span style="color:var(--err);font-size:12px">Error: '+esc(ev.data)+'</span>'}}catch(_){}}}}catch(e){card.innerHTML='<span style="color:var(--err);font-size:12px">Server offline. Run TALEEM backend at localhost:8000 and set OPENAI_API_KEY in .env</span>'}finally{streaming=false;document.getElementById('sendBtn').disabled=false;document.getElementById('statusPill').textContent='Ready';sd()}}
+renderSL();loadP();
+
+// =============================================================
+// TALEEM — Pakistan Language Switcher
+// All 14 Pakistani languages with full UI translation
+// =============================================================
+
+
+// =================================================================
+// TALEEM — Complete Language System
+// 14 Pakistani Languages · Authentic Fonts · Full UI Translation
+// Phoenix Group | AI Engineering Division
+// =================================================================
+
+// ── Font map — best authentic typeface for each language ──────────
+// Research basis:
+//   Urdu/Sindhi/Saraiki/Hindko/Balochi/Shina — Nastaliq script family
+//   Pashto — Nastaliq with distinct Pashto letterforms
+//   Arabic  — classical Naskh for readability
+//   Punjabi — Gurmukhi script (official Pakistan Punjabi also uses Shahmukhi)
+//   Balti   — Tibetan-influenced, Latin fallback
+//   Wakhi   — Arabic-based, Latin fallback
+//   Persian — Nastaliq/Naskh family
+//   Brahui  — Arabic-based
+
+const LANG_FONTS = {
+  en:  { family: "'DM Sans', sans-serif",                  gfUrl: null },
+  ur:  { family: "'Noto Nastaliq Urdu', serif",            gfUrl: "https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&display=swap" },
+  sd:  { family: "'Noto Nastaliq Urdu', serif",            gfUrl: "https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&display=swap" },
+  pa:  { family: "'Mukta Mahee', sans-serif",              gfUrl: "https://fonts.googleapis.com/css2?family=Mukta+Mahee:wght@300;400;600;700&display=swap" },
+  ps:  { family: "'Noto Nastaliq Urdu', serif",            gfUrl: "https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&display=swap" },
+  bal: { family: "'Noto Naskh Arabic', serif",             gfUrl: "https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" },
+  ar:  { family: "'Noto Naskh Arabic', serif",             gfUrl: "https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" },
+  sk:  { family: "'Noto Nastaliq Urdu', serif",            gfUrl: "https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&display=swap" },
+  hk:  { family: "'Noto Nastaliq Urdu', serif",            gfUrl: "https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&display=swap" },
+  br:  { family: "'Noto Naskh Arabic', serif",             gfUrl: "https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" },
+  sh:  { family: "'Noto Nastaliq Urdu', serif",            gfUrl: "https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&display=swap" },
+  bt:  { family: "'Noto Serif Tibetan', serif",            gfUrl: "https://fonts.googleapis.com/css2?family=Noto+Serif+Tibetan:wght@400;600;700&display=swap" },
+  wk:  { family: "'Noto Naskh Arabic', serif",             gfUrl: "https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" },
+  fa:  { family: "'Noto Nastaliq Urdu', serif",            gfUrl: "https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&display=swap" },
+};
+
+// ── Language metadata ─────────────────────────────────────────────
+const LANGS = {
+  en:  { name:'English',    native:'English',       dir:'ltr', size:'13px',  lineH:'1.6'  },
+  ur:  { name:'Urdu',       native:'اردو',           dir:'rtl', size:'15px',  lineH:'2.0'  },
+  sd:  { name:'Sindhi',     native:'سنڌي',           dir:'rtl', size:'15px',  lineH:'2.0'  },
+  pa:  { name:'Punjabi',    native:'ਪੰਜਾਬੀ',         dir:'ltr', size:'13.5px',lineH:'1.65' },
+  ps:  { name:'Pashto',     native:'پښتو',           dir:'rtl', size:'15px',  lineH:'2.0'  },
+  bal: { name:'Balochi',    native:'بلوچی',          dir:'rtl', size:'14.5px',lineH:'1.9'  },
+  ar:  { name:'Arabic',     native:'العربية',        dir:'rtl', size:'14.5px',lineH:'1.9'  },
+  sk:  { name:'Saraiki',    native:'سرائیکی',        dir:'rtl', size:'15px',  lineH:'2.0'  },
+  hk:  { name:'Hindko',     native:'ہندکو',          dir:'rtl', size:'15px',  lineH:'2.0'  },
+  br:  { name:'Brahui',     native:'براہوئی',        dir:'rtl', size:'14.5px',lineH:'1.9'  },
+  sh:  { name:'Shina',      native:'شینا',           dir:'rtl', size:'15px',  lineH:'2.0'  },
+  bt:  { name:'Balti',      native:'སྦལ་ཏི།',        dir:'ltr', size:'13.5px',lineH:'1.65' },
+  wk:  { name:'Wakhi',      native:'وخی',            dir:'rtl', size:'14.5px',lineH:'1.9'  },
+  fa:  { name:'Persian',    native:'فارسی',          dir:'rtl', size:'14.5px',lineH:'1.9'  },
+};
+
+// ── Complete UI translations ──────────────────────────────────────
+const T = {
+  en: {
+    'step-province':    'Province',
+    'step-city':        'City',
+    'step-board':       'Board',
+    'step-edlevel':     'Education Level',
+    'step-grade':       'Grade / Stream',
+    'step-medium':      'Medium of Instruction',
+    'step-subject':     'Subject',
+    'step-teacher':     'Your AI Teacher',
+    'step-sessions':    'Sessions',
+    'mem-label':        'Session Memory',
+    'board-label':      'Board Information',
+    'topics-label':     'Suggested Topics',
+    'progress-label':   'Session Progress',
+    'q-asked':          'Questions Asked',
+    'concepts':         'Concepts Covered',
+    'mem-msgs':         'Memory Messages',
+    'new-session':      '+ New Session',
+    'send-hint':        'Enter to send · Shift+Enter new line',
+    'welcome-title':    'Learn Anything.<br><em>In Any Language.</em>',
+    'welcome-sub':      'Select your province, city, and board to begin. TALEEM covers every board in Pakistan — Pre-School through A-Level, in your language, on your curriculum.',
+    'welcome-badge':    'Wikipedia RAG · GPT-4o-mini · LangChain · All Pakistan Boards',
+    'not-selected':     'Not selected',
+    'select-board-level':'Select board and level',
+    'board-default-info':'Board details appear after selection.',
+    'no-convo':         'No conversation yet. Memory summary will appear as you chat.',
+    'status-ready':     'Ready',
+    'status-gen':       'Generating...',
+    'teacher-default':  'Select a subject to meet your teacher',
+    'placeholder':      'Ask your teacher anything...',
+    'sel-province':     'Select Province...',
+    'sel-city':         'Select Province first...',
+    'sel-board':        'Select City first...',
+    'sel-level':        'Select Board first...',
+    'sel-grade':        'Select Level first...',
+    'no-sessions':      'No sessions yet',
+    'quick-1':          "Explain Newton's Laws with examples",
+    'quick-2':          'What caused the partition of 1947?',
+    'quick-3':          'How does photosynthesis work?',
+    'quick-4':          'Explain the water cycle',
+    'quick-5':          'Solve a quadratic equation',
+    'quick-6':          "Role of Quaid-e-Azam in Pakistan's creation",
+    'ctx-default':      'Select curriculum to begin',
+    'provinces-lbl':    'Provinces',
+    'boards-lbl':       'Boards',
+  },
+  ur: {
+    'step-province':    'صوبہ',
+    'step-city':        'شہر',
+    'step-board':       'بورڈ',
+    'step-edlevel':     'تعلیمی سطح',
+    'step-grade':       'گریڈ / شعبہ',
+    'step-medium':      'ذریعہ تعلیم',
+    'step-subject':     'مضمون',
+    'step-teacher':     'آپ کا AI استاد',
+    'step-sessions':    'سیشنز',
+    'mem-label':        'سیشن میموری',
+    'board-label':      'بورڈ کی معلومات',
+    'topics-label':     'تجویز کردہ موضوعات',
+    'progress-label':   'سیشن پیشرفت',
+    'q-asked':          'سوالات پوچھے',
+    'concepts':         'تصورات سیکھے',
+    'mem-msgs':         'میموری پیغامات',
+    'new-session':      '+ نیا سیشن',
+    'send-hint':        'بھیجنے کیلئے Enter · نئی لائن Shift+Enter',
+    'welcome-title':    'کچھ بھی سیکھیں۔<br><em>کسی بھی زبان میں۔</em>',
+    'welcome-sub':      'اپنا صوبہ، شہر اور بورڈ منتخب کریں۔ TALEEM پاکستان کے تمام بورڈز کو کور کرتا ہے — پری اسکول سے A-Level تک، آپ کی زبان میں، آپ کے نصاب پر۔',
+    'welcome-badge':    'ویکیپیڈیا RAG · GPT-4o-mini · LangChain · تمام پاکستانی بورڈز',
+    'not-selected':     'منتخب نہیں',
+    'select-board-level':'بورڈ اور سطح منتخب کریں',
+    'board-default-info':'انتخاب کے بعد بورڈ کی تفصیلات ظاہر ہوں گی۔',
+    'no-convo':         'ابھی کوئی گفتگو نہیں۔ چیٹ کرتے وقت میموری خلاصہ ظاہر ہوگا۔',
+    'status-ready':     'تیار',
+    'status-gen':       'تیار ہو رہا ہے...',
+    'teacher-default':  'استاد سے ملنے کیلئے مضمون منتخب کریں',
+    'placeholder':      'اپنے استاد سے کچھ بھی پوچھیں...',
+    'sel-province':     'صوبہ منتخب کریں...',
+    'sel-city':         'پہلے صوبہ منتخب کریں...',
+    'sel-board':        'پہلے شہر منتخب کریں...',
+    'sel-level':        'پہلے بورڈ منتخب کریں...',
+    'sel-grade':        'پہلے سطح منتخب کریں...',
+    'no-sessions':      'ابھی کوئی سیشن نہیں',
+    'quick-1':          'نیوٹن کے قوانین مثالوں کے ساتھ',
+    'quick-2':          '1947 کی تقسیم کی وجوہات',
+    'quick-3':          'فوٹوسنتھیسس کیسے کام کرتی ہے؟',
+    'quick-4':          'پانی کے چکر کی وضاحت',
+    'quick-5':          'دوتکرجی مساوات حل کریں',
+    'quick-6':          'قیام پاکستان میں قائداعظم کا کردار',
+    'ctx-default':      'شروع کرنے کیلئے نصاب منتخب کریں',
+    'provinces-lbl':    'صوبے',
+    'boards-lbl':       'بورڈز',
+  },
+  sd: {
+    'step-province':    'صوبو',
+    'step-city':        'شهر',
+    'step-board':       'بورڊ',
+    'step-edlevel':     'تعليمي سطح',
+    'step-grade':       'گريڊ / شعبو',
+    'step-medium':      'تعليم جو ذريعو',
+    'step-subject':     'مضمون',
+    'step-teacher':     'توهان جو AI استاد',
+    'step-sessions':    'سيشن',
+    'mem-label':        'سيشن ياداشت',
+    'board-label':      'بورڊ جي معلومات',
+    'topics-label':     'تجويز ڪيل موضوع',
+    'progress-label':   'سيشن پيشرفت',
+    'q-asked':          'پڇيا ويا سوال',
+    'concepts':         'سکيا ويا تصور',
+    'mem-msgs':         'ياداشت پيغام',
+    'new-session':      '+ نئون سيشن',
+    'send-hint':        'موڪلڻ لاءِ Enter · نئين لائن Shift+Enter',
+    'welcome-title':    'ڪجهه به سکو۔<br><em>ڪنهن به ٻولي ۾۔</em>',
+    'welcome-sub':      'پنهنجو صوبو، شهر ۽ بورڊ چونڊيو. TALEEM پاڪستان جا سڀ بورڊ ڍڪي ٿو.',
+    'welcome-badge':    'ويڪيپيڊيا RAG · GPT-4o-mini · سمورا پاڪستاني بورڊ',
+    'not-selected':     'چونڊيو نه ويو',
+    'select-board-level':'بورڊ ۽ سطح چونڊيو',
+    'board-default-info':'چونڊ کانپوءِ بورڊ جون تفصيلون ظاهر ٿينديون.',
+    'no-convo':         'اڃا ڪا ڳالهه ٻولهه ناهي.',
+    'status-ready':     'تيار',
+    'status-gen':       'تيار ٿي رهيو آهي...',
+    'teacher-default':  'استاد سان ملڻ لاءِ مضمون چونڊيو',
+    'placeholder':      'پنهنجي استاد کان ڪجهه به پڇو...',
+    'sel-province':     'صوبو چونڊيو...',
+    'sel-city':         'پهريان صوبو چونڊيو...',
+    'sel-board':        'پهريان شهر چونڊيو...',
+    'sel-level':        'پهريان بورڊ چونڊيو...',
+    'sel-grade':        'پهريان سطح چونڊيو...',
+    'no-sessions':      'اڃا ڪو سيشن ناهي',
+    'quick-1':          'نيوٽن جا قانون مثالن سان',
+    'quick-2':          '1947 واري ورهاڱي جون سببون',
+    'quick-3':          'فوٽوسنٿيسس ڪيئن ڪم ڪري ٿي؟',
+    'quick-4':          'پاڻيءَ جي چڪر جي وضاحت',
+    'quick-5':          'چورس مساوات حل ڪريو',
+    'quick-6':          'قائداعظم جو قيام پاڪستان ۾ ڪردار',
+    'ctx-default':      'شروع ڪرڻ لاءِ نصاب چونڊيو',
+    'provinces-lbl':    'صوبا',
+    'boards-lbl':       'بورڊ',
+  },
+  ps: {
+    'step-province':    'ولایت',
+    'step-city':        'ښار',
+    'step-board':       'بورډ',
+    'step-edlevel':     'د زده‌کړې کچه',
+    'step-grade':       'ټولګي / شاخه',
+    'step-medium':      'د زده‌کړې ژبه',
+    'step-subject':     'مضمون',
+    'step-teacher':     'ستاسو AI ښوونکی',
+    'step-sessions':    'ناستې',
+    'mem-label':        'د ناستې حافظه',
+    'board-label':      'د بورډ معلومات',
+    'topics-label':     'وړاندیز شوي موضوعات',
+    'progress-label':   'د ناستې پرمختګ',
+    'q-asked':          'پوښتل شوي پوښتنې',
+    'concepts':         'زده شوي مفاهیم',
+    'mem-msgs':         'د حافظې پیغامونه',
+    'new-session':      '+ نوې ناسته',
+    'send-hint':        'د لیږلو لپاره Enter · نوې کرښه Shift+Enter',
+    'welcome-title':    'هر شی زده کړه۔<br><em>هر ژبه کې۔</em>',
+    'welcome-sub':      'خپل ولایت، ښار او بورډ غوره کړئ. TALEEM د پاکستان ټول بورډونه پوښي.',
+    'welcome-badge':    'ویکیپیډیا RAG · GPT-4o-mini · د پاکستان ټول بورډونه',
+    'not-selected':     'نه دی غوره شوی',
+    'select-board-level':'بورډ او کچه غوره کړئ',
+    'board-default-info':'د انتخاب وروسته د بورډ توضیحات به ښکاره شي.',
+    'no-convo':         'تر اوسه هیڅ خبرې نشته.',
+    'status-ready':     'چمتو',
+    'status-gen':       'جوړیږي...',
+    'teacher-default':  'د ښوونکي سره د لیدو لپاره مضمون غوره کړئ',
+    'placeholder':      'خپل ښوونکي ته هر شی وپوښتئ...',
+    'sel-province':     'ولایت غوره کړئ...',
+    'sel-city':         'لومړی ولایت غوره کړئ...',
+    'sel-board':        'لومړی ښار غوره کړئ...',
+    'sel-level':        'لومړی بورډ غوره کړئ...',
+    'sel-grade':        'لومړی کچه غوره کړئ...',
+    'no-sessions':      'هیڅ ناسته نشته',
+    'quick-1':          'د نیوټن قوانین د مثالونو سره',
+    'quick-2':          'د ۱۹۴۷ د ویش لاملونه',
+    'quick-3':          'فوټوسینتیسیس څنګه کار کوي؟',
+    'quick-4':          'د اوبو چکر توضیح',
+    'quick-5':          'دوهمه درجه معادله حل کړئ',
+    'quick-6':          'د پاکستان جوړولو کې د قائداعظم رول',
+    'ctx-default':      'د پیلولو لپاره نصاب غوره کړئ',
+    'provinces-lbl':    'ولایتونه',
+    'boards-lbl':       'بورډونه',
+  },
+  pa: {
+    'step-province':    'ਸੂਬਾ',
+    'step-city':        'ਸ਼ਹਿਰ',
+    'step-board':       'ਬੋਰਡ',
+    'step-edlevel':     'ਸਿੱਖਿਆ ਦੱਰਜਾ',
+    'step-grade':       'ਜਮਾਤ / ਧਾਰਾ',
+    'step-medium':      'ਸਿੱਖਿਆ ਮਾਧਿਅਮ',
+    'step-subject':     'ਵਿਸ਼ਾ',
+    'step-teacher':     'ਤੁਹਾਡਾ AI ਅਧਿਆਪਕ',
+    'step-sessions':    'ਸੈਸ਼ਨ',
+    'mem-label':        'ਸੈਸ਼ਨ ਮੈਮੋਰੀ',
+    'board-label':      'ਬੋਰਡ ਜਾਣਕਾਰੀ',
+    'topics-label':     'ਸੁਝਾਏ ਵਿਸ਼ੇ',
+    'progress-label':   'ਸੈਸ਼ਨ ਪ੍ਰਗਤੀ',
+    'q-asked':          'ਪੁੱਛੇ ਸਵਾਲ',
+    'concepts':         'ਸਿੱਖੇ ਸੰਕਲਪ',
+    'mem-msgs':         'ਮੈਮੋਰੀ ਸੁਨੇਹੇ',
+    'new-session':      '+ ਨਵਾਂ ਸੈਸ਼ਨ',
+    'send-hint':        'ਭੇਜਣ ਲਈ Enter · ਨਵੀਂ ਲਾਈਨ Shift+Enter',
+    'welcome-title':    'ਕੁਝ ਵੀ ਸਿੱਖੋ।<br><em>ਕਿਸੇ ਵੀ ਭਾਸ਼ਾ ਵਿੱਚ।</em>',
+    'welcome-sub':      'ਆਪਣਾ ਸੂਬਾ, ਸ਼ਹਿਰ ਅਤੇ ਬੋਰਡ ਚੁਣੋ। TALEEM ਪਾਕਿਸਤਾਨ ਦੇ ਸਾਰੇ ਬੋਰਡਾਂ ਨੂੰ ਕਵਰ ਕਰਦਾ ਹੈ।',
+    'welcome-badge':    'ਵਿਕੀਪੀਡੀਆ RAG · GPT-4o-mini · ਸਾਰੇ ਪਾਕਿਸਤਾਨੀ ਬੋਰਡ',
+    'not-selected':     'ਚੁਣਿਆ ਨਹੀਂ',
+    'select-board-level':'ਬੋਰਡ ਅਤੇ ਦੱਰਜਾ ਚੁਣੋ',
+    'board-default-info':'ਚੋਣ ਤੋਂ ਬਾਅਦ ਬੋਰਡ ਵੇਰਵੇ ਦਿਖਾਈ ਦੇਣਗੇ।',
+    'no-convo':         'ਅਜੇ ਕੋਈ ਗੱਲਬਾਤ ਨਹੀਂ।',
+    'status-ready':     'ਤਿਆਰ',
+    'status-gen':       'ਬਣ ਰਿਹਾ ਹੈ...',
+    'teacher-default':  'ਅਧਿਆਪਕ ਨੂੰ ਮਿਲਣ ਲਈ ਵਿਸ਼ਾ ਚੁਣੋ',
+    'placeholder':      'ਆਪਣੇ ਅਧਿਆਪਕ ਤੋਂ ਕੁਝ ਵੀ ਪੁੱਛੋ...',
+    'sel-province':     'ਸੂਬਾ ਚੁਣੋ...',
+    'sel-city':         'ਪਹਿਲਾਂ ਸੂਬਾ ਚੁਣੋ...',
+    'sel-board':        'ਪਹਿਲਾਂ ਸ਼ਹਿਰ ਚੁਣੋ...',
+    'sel-level':        'ਪਹਿਲਾਂ ਬੋਰਡ ਚੁਣੋ...',
+    'sel-grade':        'ਪਹਿਲਾਂ ਦੱਰਜਾ ਚੁਣੋ...',
+    'no-sessions':      'ਅਜੇ ਕੋਈ ਸੈਸ਼ਨ ਨਹੀਂ',
+    'quick-1':          'ਨਿਊਟਨ ਦੇ ਨਿਯਮ ਉਦਾਹਰਣਾਂ ਨਾਲ',
+    'quick-2':          '1947 ਦੀ ਵੰਡ ਦੇ ਕਾਰਨ',
+    'quick-3':          'ਪ੍ਰਕਾਸ਼ ਸੰਸ਼ਲੇਸ਼ਣ ਕਿਵੇਂ ਕੰਮ ਕਰਦਾ ਹੈ?',
+    'quick-4':          'ਪਾਣੀ ਦੇ ਚੱਕਰ ਦੀ ਵਿਆਖਿਆ',
+    'quick-5':          'ਦੋ-ਦਰਜੀ ਸਮੀਕਰਨ ਹੱਲ ਕਰੋ',
+    'quick-6':          'ਪਾਕਿਸਤਾਨ ਬਣਾਉਣ ਵਿੱਚ ਕਾਇਦ-ਏ-ਆਜ਼ਮ ਦੀ ਭੂਮਿਕਾ',
+    'ctx-default':      'ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਨਸਾਬ ਚੁਣੋ',
+    'provinces-lbl':    'ਸੂਬੇ',
+    'boards-lbl':       'ਬੋਰਡ',
+  },
+  ar: {
+    'step-province':    'المحافظة',
+    'step-city':        'المدينة',
+    'step-board':       'مجلس التعليم',
+    'step-edlevel':     'المستوى التعليمي',
+    'step-grade':       'الصف / التخصص',
+    'step-medium':      'لغة التعليم',
+    'step-subject':     'المادة',
+    'step-teacher':     'معلمك الذكي',
+    'step-sessions':    'الجلسات',
+    'mem-label':        'ذاكرة الجلسة',
+    'board-label':      'معلومات المجلس',
+    'topics-label':     'مواضيع مقترحة',
+    'progress-label':   'تقدم الجلسة',
+    'q-asked':          'الأسئلة المطروحة',
+    'concepts':         'المفاهيم المكتسبة',
+    'mem-msgs':         'رسائل الذاكرة',
+    'new-session':      '+ جلسة جديدة',
+    'send-hint':        'Enter للإرسال · Shift+Enter سطر جديد',
+    'welcome-title':    'تعلّم أي شيء۔<br><em>بأي لغة۔</em>',
+    'welcome-sub':      'اختر محافظتك ومدينتك ومجلس تعليمك للبدء. TALEEM يغطي جميع مجالس باكستان.',
+    'welcome-badge':    'ويكيبيديا RAG · GPT-4o-mini · جميع مجالس باكستان',
+    'not-selected':     'غير محدد',
+    'select-board-level':'اختر المجلس والمستوى',
+    'board-default-info':'ستظهر تفاصيل المجلس بعد الاختيار.',
+    'no-convo':         'لا توجد محادثة بعد.',
+    'status-ready':     'جاهز',
+    'status-gen':       'جارٍ الإنشاء...',
+    'teacher-default':  'اختر مادة للقاء معلمك',
+    'placeholder':      'اسأل معلمك أي شيء...',
+    'sel-province':     'اختر المحافظة...',
+    'sel-city':         'اختر المحافظة أولاً...',
+    'sel-board':        'اختر المدينة أولاً...',
+    'sel-level':        'اختر المجلس أولاً...',
+    'sel-grade':        'اختر المستوى أولاً...',
+    'no-sessions':      'لا توجد جلسات بعد',
+    'quick-1':          'شرح قوانين نيوتن بأمثلة',
+    'quick-2':          'أسباب تقسيم الهند 1947',
+    'quick-3':          'كيف تعمل عملية التمثيل الضوئي؟',
+    'quick-4':          'شرح دورة المياه',
+    'quick-5':          'حل معادلة من الدرجة الثانية',
+    'quick-6':          'دور قائد الأعظم في تأسيس باكستان',
+    'ctx-default':      'اختر المنهج للبدء',
+    'provinces-lbl':    'المحافظات',
+    'boards-lbl':       'المجالس',
+  },
+  bal: {
+    'step-province':    'استان',
+    'step-city':        'شهر',
+    'step-board':       'هیئت آموزشی',
+    'step-edlevel':     'سطح تحصیل',
+    'step-grade':       'پایه / رشته',
+    'step-medium':      'زبان تدریس',
+    'step-subject':     'درس',
+    'step-teacher':     'استاد AI شما',
+    'step-sessions':    'جلسات',
+    'mem-label':        'حافظه جلسه',
+    'board-label':      'اطلاعات هیئت',
+    'topics-label':     'موضوعات پیشنهادی',
+    'progress-label':   'پیشرفت جلسه',
+    'q-asked':          'سوالات پرسیده شده',
+    'concepts':         'مفاهیم یاد گرفته',
+    'mem-msgs':         'پیام‌های حافظه',
+    'new-session':      '+ جلسه جدید',
+    'send-hint':        'Enter برای ارسال · Shift+Enter خط جدید',
+    'welcome-title':    'هر چیزی یاد بگیرید۔<br><em>به هر زبانی۔</em>',
+    'welcome-sub':      'استان، شهر و هیئت آموزشی خود را انتخاب کنید. TALEEM همه هیئت‌های پاکستان را پوشش می‌دهد.',
+    'welcome-badge':    'ویکیپدیا RAG · GPT-4o-mini · همه هیئت‌های پاکستان',
+    'not-selected':     'انتخاب نشده',
+    'select-board-level':'هیئت و سطح را انتخاب کنید',
+    'board-default-info':'جزئیات هیئت پس از انتخاب ظاهر می‌شود.',
+    'no-convo':         'هنوز مکالمه‌ای نیست.',
+    'status-ready':     'آماده',
+    'status-gen':       'در حال تولید...',
+    'teacher-default':  'برای ملاقات با استاد، درس انتخاب کنید',
+    'placeholder':      'هر چیزی از استادتان بپرسید...',
+    'sel-province':     'استان را انتخاب کنید...',
+    'sel-city':         'اول استان را انتخاب کنید...',
+    'sel-board':        'اول شهر را انتخاب کنید...',
+    'sel-level':        'اول هیئت را انتخاب کنید...',
+    'sel-grade':        'اول سطح را انتخاب کنید...',
+    'no-sessions':      'هنوز جلسه‌ای نیست',
+    'quick-1':          'قوانین نیوتن با مثال',
+    'quick-2':          'علل تقسیم هند ۱۹۴۷',
+    'quick-3':          'فتوسنتز چگونه کار می‌کند؟',
+    'quick-4':          'توضیح چرخه آب',
+    'quick-5':          'حل معادله درجه دوم',
+    'quick-6':          'نقش قائداعظم در تأسیس پاکستان',
+    'ctx-default':      'برای شروع برنامه درسی انتخاب کنید',
+    'provinces-lbl':    'استان‌ها',
+    'boards-lbl':       'هیئت‌ها',
+  },
+};
+
+// Languages that share Urdu strings (with own name) — Saraiki, Hindko, Shina, Wakhi
+['sk','hk','sh','wk'].forEach(k => { T[k] = {...T.ur}; });
+// Brahui uses Arabic strings
+T.br = {...T.ar};
+// Balti and Persian use Balochi/Persian (Balochi already done above)
+T.fa = {...T.bal};
+T.bt = {...T.en};  // Balti: no standard digital keyboard — fall back to English with Tibetan script note
+
+// ── Track loaded fonts ────────────────────────────────────────────
+const _loadedFonts = new Set(['en']);
+
+function loadFontForLang(code) {
+  if (_loadedFonts.has(code)) return;
+  const fnt = LANG_FONTS[code];
+  if (!fnt || !fnt.gfUrl) return;
+  // Check if already injected
+  if (document.querySelector(`link[data-lang-font="${code}"]`)) {
+    _loadedFonts.add(code); return;
+  }
+  const link = document.createElement('link');
+  link.rel          = 'stylesheet';
+  link.href         = fnt.gfUrl;
+  link.setAttribute('data-lang-font', code);
+  document.head.appendChild(link);
+  _loadedFonts.add(code);
+}
+
+// ── Apply full font to entire UI ──────────────────────────────────
+function applyFont(code) {
+  const fnt  = LANG_FONTS[code] || LANG_FONTS.en;
+  const lang = LANGS[code] || LANGS.en;
+  // Apply to body and all key elements
+  document.body.style.fontFamily   = fnt.family;
+  document.body.style.fontSize     = lang.size;
+  document.body.style.lineHeight   = lang.lineH;
+  // Apply specifically to input
+  const inp = document.getElementById('msg-input');
+  if (inp) { inp.style.fontFamily = fnt.family; inp.style.fontSize = lang.size; }
+  // Apply to all selects
+  document.querySelectorAll('.cs').forEach(el => {
+    el.style.fontFamily = fnt.family;
+    el.style.fontSize   = lang.size;
+  });
+  // Apply to left panel text
+  document.querySelector('.left-panel').style.fontFamily = fnt.family;
+  // Apply to chat window
+  const cw = document.getElementById('chatWin');
+  if (cw) cw.style.fontFamily = fnt.family;
+}
+
+// ── Core translation engine — ID and data-i18n based ─────────────
+function applyLang(code) {
+  const prev = currentLang;
+  currentLang = code;
+  const s   = T[code]   || T.en;
+  const lng = LANGS[code] || LANGS.en;
+
+  // Load font asynchronously before applying
+  loadFontForLang(code);
+
+  // 1. Document direction + lang
+  document.documentElement.dir  = lng.dir;
+  document.documentElement.lang = code;
+
+  // 2. Font
+  applyFont(code);
+
+  // 3. Language button label
+  document.getElementById('langLabel').textContent = lng.native || lng.name;
+
+  // 4. Translate all [data-i18n] elements
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (s[key] !== undefined) el.textContent = s[key];
+  });
+
+  // 5. Translate [data-i18n-html] elements (allow HTML like <em>)
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const key = el.getAttribute('data-i18n-html');
+    if (s[key] !== undefined) el.innerHTML = s[key];
+  });
+
+  // 6. Input placeholder
+  const inp = document.getElementById('msg-input');
+  if (inp) inp.placeholder = s['placeholder'] || T.en['placeholder'];
+
+  // 7. Select dropdown first options (placeholders)
+  const selMap = {
+    'selP': 'sel-province',
+    'selC': 'sel-city',
+    'selB': 'sel-board',
+    'selL': 'sel-level',
+    'selG': 'sel-grade',
+  };
+  Object.entries(selMap).forEach(([selId, tKey]) => {
+    const sel = document.getElementById(selId);
+    if (sel && sel.options[0]) {
+      sel.options[0].textContent = s[tKey] || T.en[tKey];
+    }
+  });
+
+  // 8. Status pill
+  const sp = document.getElementById('statusPill');
+  if (sp) {
+    sp.textContent = streaming
+      ? (s['status-gen'] || T.en['status-gen'])
+      : (s['status-ready'] || T.en['status-ready']);
+  }
+
+  // 9. Quick-start chips
+  const qr = document.getElementById('quickRow') || document.querySelector('.qr');
+  if (qr) {
+    const chips = qr.querySelectorAll('.qc');
+    const qKeys = ['quick-1','quick-2','quick-3','quick-4','quick-5','quick-6'];
+    chips.forEach((chip, i) => {
+      if (qKeys[i] && s[qKeys[i]]) {
+        chip.textContent = s[qKeys[i]];
+        // Update onclick quickAsk text
+        chip.onclick = () => qa(s[qKeys[i]]);
+      }
+    });
+  }
+
+  // 10. Stat labels
+  const provLbl  = document.querySelector('[id="sprov"]')?.parentElement?.querySelector('.sl');
+  const boardLbl = document.querySelector('[id="sboard"]')?.parentElement?.querySelector('.sl');
+  if (provLbl)  provLbl.textContent  = s['provinces-lbl'] || 'Provinces';
+  if (boardLbl) boardLbl.textContent = s['boards-lbl']    || 'Boards';
+
+  // 11. memBox default text (only if still showing default)
+  const mb = document.getElementById('memBox');
+  if (mb && (mb.textContent.includes('No conversation') || mb.textContent.includes('ابھی')||mb.textContent.includes('اڃا')||mb.textContent.includes('ਅਜੇ')||mb.textContent.includes('هیڅ')||mb.textContent.includes('هنوز')||mb.textContent.includes('لا توجد')||mb.textContent.includes('لا يوجد'))) {
+    mb.textContent = s['no-convo'] || T.en['no-convo'];
+  }
+
+  // 12. Teacher default role
+  const tr = document.getElementById('tRole');
+  if (tr && !ST.subject) tr.textContent = s['teacher-default'] || T.en['teacher-default'];
+
+  // 13. Context info default
+  const ci = document.getElementById('ctxInfo');
+  if (ci && !ST.subject) ci.textContent = s['ctx-default'] || T.en['ctx-default'];
+
+  // 14. biB, biL, biS defaults
+  const biB = document.getElementById('biB');
+  const biL = document.getElementById('biL');
+  const biS = document.getElementById('biS');
+  if (biB && !ST.board) biB.textContent = s['not-selected']      || T.en['not-selected'];
+  if (biL && !ST.board) biL.textContent = s['select-board-level'] || T.en['select-board-level'];
+  if (biS && !ST.board) biS.textContent = s['board-default-info'] || T.en['board-default-info'];
+
+  // 15. No sessions text
+  const sl = document.getElementById('sessList');
+  if (sl && Object.keys(sessions).length === 0) {
+    sl.innerHTML = `<div style="font-size:10px;color:var(--text-faint);font-style:italic;padding:4px 2px">${s['no-sessions']||T.en['no-sessions']}</div>`;
+  }
+
+  // 16. RTL-specific layout adjustments
+  if (lng.dir === 'rtl') {
+    document.querySelectorAll('.input-hint').forEach(el => {
+      el.style.flexDirection = 'row-reverse';
+    });
+    document.querySelectorAll('.lp-header').forEach(el => {
+      el.style.flexDirection = 'row-reverse';
+    });
+  } else {
+    document.querySelectorAll('.input-hint').forEach(el => {
+      el.style.flexDirection = '';
+    });
+    document.querySelectorAll('.lp-header').forEach(el => {
+      el.style.flexDirection = '';
+    });
+  }
+
+  // 17. Rebuild lang menu (updates active state)
+  buildLangMenu();
+}
+
+// ── Build language dropdown menu ──────────────────────────────────
+function buildLangMenu() {
+  const menu = document.getElementById('langMenu');
+  if (!menu) return;
+  menu.innerHTML = '';
+  Object.entries(LANGS).forEach(([code, lang]) => {
+    const opt = document.createElement('div');
+    opt.className = 'lang-opt' + (code === currentLang ? ' active' : '');
+    opt.style.fontFamily = (LANG_FONTS[code]||LANG_FONTS.en).family;
+    opt.innerHTML = `<span style="font-family:'DM Sans',sans-serif;font-size:10.5px">${lang.name}</span><span class="lang-native" style="font-family:${(LANG_FONTS[code]||LANG_FONTS.en).family};font-size:13px">${lang.native}</span>`;
+    opt.onclick = () => { applyLang(code); toggleLangMenu(); };
+    menu.appendChild(opt);
+  });
+}
+
+function toggleLangMenu() {
+  document.getElementById('langMenu').classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  const sw = document.getElementById('langSwitcher');
+  if (sw && !sw.contains(e.target)) document.getElementById('langMenu').classList.remove('open');
+});
+
+// ── Init ──────────────────────────────────────────────────────────
+buildLangMenu();
+
+</script>
